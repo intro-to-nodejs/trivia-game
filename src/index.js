@@ -31,6 +31,13 @@ io.on('connection', socket => {
     socket.join(newPlayer.room);
 
     socket.emit('message', formatMessage('Admin', 'Welcome!'));
+
+    socket.broadcast
+      .to(newPlayer.room)
+      .emit(
+        'message',
+        formatMessage('Admin', `${newPlayer.playerName} has joined the game!`)
+      );
   });
 });
 
