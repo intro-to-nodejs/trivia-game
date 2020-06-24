@@ -44,6 +44,25 @@ io.on('connection', socket => {
       players: getAllPlayers(newPlayer.room),
     });
   });
+
+  socket.on('disconnect', () => {
+    console.log('A player disconnected.');
+
+    const disconnectedPlayer = removePlayer(socket.id);
+
+    if (disconnectedPlayer) {
+      const { playerName, room } = disconnectedPlayer;
+      io.in(room).emit(
+        'message',
+        formatMessage('Admin', `${playerName} has left!`)
+      );
+
+      io.in(room).emit('room', {
+        room,
+        players: getAllPlayers(room),
+      });
+    }
+  });
 });
 
 const port = process.env.PORT || 8080;
