@@ -38,6 +38,11 @@ io.on('connection', socket => {
         'message',
         formatMessage('Admin', `${newPlayer.playerName} has joined the game!`)
       );
+
+    io.in(newPlayer.room).emit('room', {
+      room: newPlayer.room,
+      players: getAllPlayers(newPlayer.room),
+    });
   });
 });
 
