@@ -1,5 +1,8 @@
+const socket = io();
+
 const urlSearchParams = new URLSearchParams(window.location.search);
 const playerName = urlSearchParams.get('playerName');
+const room = urlSearchParams.get('room');
 
 /*
   WELCOME HEADER
@@ -13,3 +16,29 @@ document.querySelector('main').insertAdjacentHTML(
     playerName,
   })
 );
+
+/*
+  SOCKETIO JOIN EVENT EMITTER
+*/
+socket.emit('join', { playerName, room }, error => {
+  if (error) {
+    alert(error);
+    location.href = '/';
+  }
+});
+
+/*
+  SOCKETIO MESSAGE EVENT LISTENER
+*/
+socket.on('message', ({ playerName, text, createdAt }) => {
+  const chatMessages = document.querySelector('.chat__messages');
+  const messageTemplate = document.querySelector('#message-template').innerHTML;
+  const template = Handlebars.compile(messageTemplate);
+
+  const html = template({
+    playerName,
+    text,
+    createdAt: moment(createdAt).format('h:mm a'),
+  });
+  chatMessages.insertAdjacentHTML('afterBegin', html);
+});
