@@ -62,6 +62,45 @@ socket.on('room', ({ room, players }) => {
 });
 
 /*
+  SOCKETIO QUESTION EVENT LISTENER
+*/
+const decodeHTMLEntities = text => {
+  const textArea = document.createElement('textarea');
+  textArea.innerHTML = text;
+  return textArea.value;
+};
+
+socket.on('question', ({ answers, createdAt, playerName, question }) => {
+  const triviaForm = document.querySelector('.trivia__form');
+  const triviaQuestion = document.querySelector('.trivia__question');
+  const triviaAnswers = document.querySelector('.trivia__answers');
+  const triviaQuestionButton = document.querySelector('.trivia__question-btn');
+  const triviaFormSubmitButton = triviaForm.querySelector(
+    '.trivia__submit-btn'
+  );
+
+  const questionTemplate = document.querySelector('#trivia-question-template')
+    .innerHTML;
+
+  triviaQuestion.innerHTML = '';
+  triviaAnswers.innerHTML = '';
+
+  triviaQuestionButton.setAttribute('disabled', 'disabled');
+  triviaFormSubmitButton.removeAttribute('disabled');
+
+  const template = Handlebars.compile(questionTemplate);
+
+  const html = template({
+    playerName,
+    createdAt: moment(createdAt).format('h:mm a'),
+    question: decodeHTMLEntities(question),
+    answers,
+  });
+
+  triviaQuestion.insertAdjacentHTML('beforeend', html);
+});
+
+/*
   CHAT SECTION
 */
 const chatForm = document.querySelector('.chat__form');
@@ -81,6 +120,16 @@ chatForm.addEventListener('submit', event => {
     chatFormInput.value = '';
     chatFormInput.focus();
 
+    if (error) return alert(error);
+  });
+});
+
+/*
+  TRIVIA SECTION
+*/
+const triviaQuestionButton = document.querySelector('.trivia__question-btn');
+triviaQuestionButton.addEventListener('click', () => {
+  socket.emit('getQuestion', null, error => {
     if (error) return alert(error);
   });
 });
