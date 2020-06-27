@@ -61,17 +61,16 @@ io.on('connection', socket => {
     }
   });
 
-  socket.on('getQuestion', (data, callback) => {
+  socket.on('getQuestion', async (data, callback) => {
     const { error, player } = getPlayer(socket.id);
 
     if (error) return callback(error.message);
 
     if (player) {
-      setGame(game => {
-        io.to(player.room).emit('question', {
-          playerName: player.playerName,
-          ...game.prompt,
-        });
+      const game = await setGame();
+      io.to(player.room).emit('question', {
+        playerName: player.playerName,
+        ...game.prompt,
       });
     }
   });
