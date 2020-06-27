@@ -12,7 +12,7 @@ const {
   removePlayer,
 } = require('./utils/players.js');
 
-const { setGame, setGameStatus } = require('./utils/game.js');
+const { getGameStatus, setGame, setGameStatus } = require('./utils/game.js');
 
 const app = express();
 const server = http.createServer(app);
@@ -93,6 +93,22 @@ io.on('connection', socket => {
       });
 
       callback();
+    }
+  });
+
+  socket.on('getAnswer', (data, callback) => {
+    const { error, player } = getPlayer(socket.id);
+
+    if (error) return callback(error.message);
+
+    if (player) {
+      const { correctAnswer } = getGameStatus({
+        event: 'getAnswer',
+      });
+      io.to(player.room).emit(
+        'correctAnswer',
+        formatMessage(player.playerName, correctAnswer)
+      );
     }
   });
 

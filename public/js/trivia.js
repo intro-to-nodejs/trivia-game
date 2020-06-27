@@ -128,6 +128,34 @@ socket.on('answer', ({ playerName, isRoundOver, createdAt, text }) => {
 });
 
 /*
+  SOCKETIO CORRECTANSWER EVENT LISTENER
+*/
+socket.on('correctAnswer', ({ text }) => {
+  const triviaAnswers = document.querySelector('.trivia__answers');
+  const triviaQuestionButton = document.querySelector('.trivia__question-btn');
+  const triviaRevealAnswerButton = document.querySelector(
+    '.trivia__answer-btn'
+  );
+  const triviaFormSubmitButton = triviaForm.querySelector(
+    '.trivia__submit-btn'
+  );
+
+  const answerTemplate = document.querySelector('#trivia-answer-template')
+    .innerHTML;
+  const template = Handlebars.compile(answerTemplate);
+
+  const html = template({
+    text,
+  });
+
+  triviaAnswers.insertAdjacentHTML('afterBegin', html);
+
+  triviaQuestionButton.removeAttribute('disabled');
+  triviaRevealAnswerButton.setAttribute('disabled', 'disabled');
+  triviaFormSubmitButton.removeAttribute('disabled');
+});
+
+/*
   CHAT SECTION
 */
 const chatForm = document.querySelector('.chat__form');
@@ -157,6 +185,13 @@ chatForm.addEventListener('submit', event => {
 const triviaQuestionButton = document.querySelector('.trivia__question-btn');
 triviaQuestionButton.addEventListener('click', () => {
   socket.emit('getQuestion', null, error => {
+    if (error) return alert(error);
+  });
+});
+
+const triviaRevealAnswerButton = document.querySelector('.trivia__answer-btn');
+triviaRevealAnswerButton.addEventListener('click', () => {
+  socket.emit('getAnswer', null, error => {
     if (error) return alert(error);
   });
 });
