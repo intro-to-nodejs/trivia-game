@@ -12,6 +12,8 @@ const {
   removePlayer,
 } = require('./utils/players.js');
 
+const { setGame } = require('./utils/game.js');
+
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
@@ -56,6 +58,21 @@ io.on('connection', socket => {
         formatMessage(player.playerName, message)
       );
       callback();
+    }
+  });
+
+  socket.on('getQuestion', (data, callback) => {
+    const { error, player } = getPlayer(socket.id);
+
+    if (error) return callback(error.message);
+
+    if (player) {
+      setGame(game => {
+        io.to(player.room).emit('question', {
+          playerName: player.playerName,
+          ...game.prompt,
+        });
+      });
     }
   });
 
